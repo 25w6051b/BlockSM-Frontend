@@ -359,7 +359,7 @@ function pbJsonPushDetail(stateName, parentType, detailValue,index) {
 
 // サーバー側にブロックで作成したステートマシンのjsonデータを送る関数
 function postModelData() {
-    fetch ('http://localhost:8888/',{
+    fetch ("https://blocksm-backend.onrender.com/",{
         method : "POST", 
         headers : {
              'Content-Type': 'application/json'  // JSON送信のヘッダー設定
