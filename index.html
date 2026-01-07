@@ -181,7 +181,7 @@
 
     <script>
       async function fetchData() {
-        const response = await fetch('http://localhost:8888/'); // 接続するためにawaitで待つ
+        const response = await fetch("https://blocksm-backend.onrender.com/"); // 接続するためにawaitで待つ
         return await response.json(); // 値を取得するまでawaitで待つ json形式にして，リストとして受け取る
       }
 
