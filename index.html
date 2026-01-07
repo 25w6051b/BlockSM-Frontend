@@ -1,0 +1,245 @@
+
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />  <!-- エンコーディングをUTF-8に設定 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" /> <!-- 最新のレンダリングエンジンを使用 IEはあまり使われてないから不要？-->  
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+    <!-- XLSX ライブラリを CDN から読み込む -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
+
+
+    <title>ブロックでステートマシン図を学ぼう</title> <!-- webブラウザのタイトルの設定 -->
+
+    <!-- スタイルシートの設定 -->
+    <!-- mdlは外部のcssファイル -->
+    <link
+      rel="stylesheet" 
+      href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css" /> 
+    <!-- 内部のcssファイル -->
+    <link 
+      rel="stylesheet"  
+      href="styles/index.css" />
+    <link 
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <!-- <link 
+      rel="stylesheet" 
+      href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" /> -->
+    <!-- <link 
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" 
+      rel="stylesheet"> -->
+      <style>
+        /* 行の高さを大きくする */
+        .blocklyTreeRow {
+          height: 40px !important;
+          /* line-height: 32px !important; */
+        }
+        .blocklyTreeLabel {   
+          font-size: 22px !important;
+        }
+        .blocklyTreeIcon {
+          width: 20px !important;
+          height: 40px !important;
+        }
+      </style>
+  </head>
+
+
+  <body>
+    <!-- ヘッダーの色を設定 -->
+   <header class="header-bar">
+      <!-- 左寄せ：ログ取得ボタン -->
+      <div style="display:flex; justify-content: flex-start;">
+        <button class="mdl-button mdl-js-button mdl-button--raised button data-button" id="logGet" title="ログの取得を行います">ログ取得</button>
+
+        <select class="mdl-button mdl-js-button mdl-button--raised button data-button" style="margin-left:2vw" id="taskSelect" title="課題を変更できます">
+            <option disabled selected>課題の選択</option>
+        </select>
+
+        <button class="mdl-button mdl-js-button mdl-button--raised button data-button" style="margin-left:2vw" id="blockGuidance" title="ブロック構成のガイダンスを見ることができます">ガイダンス</button>
+      </div>
+
+      <!-- 右寄せ：保存・削除など -->
+      <div style= "display:flex; justify-content: flex-end; gap: 100px;">
+        <div class="relative">
+          <button class="mdl-button mdl-js-button mdl-button--raised button data-button" id="saveButton" title="ワークスペースのブロック情報を保存します">データの保存</button>
+          <div class="display-none data-area" id="inputSaveNameContainer">
+            <input type="text" id="saveNameInput" placeholder="保存したいデータ名を入力" />
+            <button class="mdl-button mdl-js-button mdl-button--raised button add-button" id="addNameButton" title="名前を付けてワークスペースのブロック情報を保存します">保存</button>
+          </div>
+        </div>
+
+        <div class="relative">
+          <button class="mdl-button mdl-js-button mdl-button--raised button data-button" id="deleteRestoreButton" title="保存したデータを削除します">データの削除</button>
+          <div class="display-none data-area" id="inputdeleteNameContainer">
+            <input type="text" id="deleteNameInput" placeholder="削除したいデータ名を入力" />
+            <button class="mdl-button mdl-js-button mdl-button--raised button add-button" id="deleteButton" title="削除したい名前を入力して、そのデータを削除します">削除</button>
+          </div>
+        </div>
+
+        <div class="relative">
+          <select class="mdl-button mdl-js-button mdl-button--raised button data-button" style="margin-right:45px" id="restoreMenu" title="保存データを現在のワークスペースに追加で読み込みます">
+            <option disabled selected>データの読込</option>
+            <!-- <option value="1" id="previousDataKey">直前のデータを読込　</option> -->
+          </select>
+        </div>
+      </div>
+    </header>
+
+    
+    <!-- スライドパネル -->
+    <div id="guidancePanel" class="mdl-shadow--4dp">
+      <div class="resize-handle"></div>
+      <button id="closeGuidance" class="mdl-button mdl-js-button" title="閉じる">
+        <i class="material-icons" style="font-size: 40px;">close</i>
+      </button>
+      <h1 class="mdl-typography--title" style="font-size: 40px;">ブロック構成ガイダンス</h1>
+      <div class="toggle-step">
+        <button class="mdl-button mdl-js-button mdl-button--raised guidance-button" id="guidance1" aria-expanded="false">
+          初期状態を定義しよう
+        </button>
+        <button class="mdl-button mdl-js-button mdl-button--raised guidance-button" id="guidance2" aria-expanded="false">
+          状態を定義しよう
+        </button>
+        <button class="mdl-button mdl-js-button mdl-button--raised guidance-button" id="guidance3" aria-expanded="false">
+          次の状態を定義しよう
+        </button>
+        <button class="mdl-button mdl-js-button mdl-button--raised guidance-button" id="guidance4" aria-expanded="false">
+          イベントを定義しよう
+        </button>
+        <button class="mdl-button mdl-js-button mdl-button--raised guidance-button" id="guidance5" aria-expanded="false">
+          状態の動きを定義しよう
+        </button>
+        <button class="mdl-button mdl-js-button mdl-button--raised guidance-button" id="guidance6" aria-expanded="false">
+          条件を定義しよう
+        </button>
+        <button class="mdl-button mdl-js-button mdl-button--raised guidance-button" id="guidance7" aria-expanded="false">
+          作用を定義しよう
+        </button>
+        <button class="mdl-button mdl-js-button mdl-button--raised guidance-button" id="guidance8" aria-expanded="false">
+          変数を使用しよう
+        </button>
+      </div>
+    </div>
+
+
+    <main>        
+      <div class="all-container">
+        <div id="logPanel" class="log-panel hidden">
+          <button id="closeLogPanel" class="mdl-button mdl-js-button" style="margin: 10px 0;" title="閉じる">
+            <i class="material-icons" style="font-size: 40px;">close</i>
+          </button>
+          <div class="log-area current-log-area" id="current-state-area"></div>
+          <div class="log-area block-log-area" id="log-area"></div>
+        </div>
+
+        <div class="startScreen-container">
+          <!-- 現在の状態と各種ボタンをまとめて表示するコンテナ -->
+          <div class="button-currentLog-container">
+            <div class="button-group">  
+              <!-- ボタンを押すとワークスペース内のブロックを実行できる -->
+              <button class="mdl-button mdl-js-button mdl-button--raised button action-button" id="behavior-inspector">動作テスト</button>
+              <!-- "リセット" ボタン -->
+              <!-- ワークスペース以外の情報をリセットできるボタン -->
+              <button class="mdl-button mdl-js-button mdl-button--raised button action-button" id="reset-control">リセット</button>
+            </div>
+          </div>
+
+          <!-- ブロックの実行結果を表示する領域とワークスペースをまとめて表示するコンテナ -->
+          <div class="workspace-container">
+            <!-- ブロックの実行結果を表示する領域 -->
+            <!-- <div class="log-area block-log-area" id="log-area"> ここに実行結果が表示されます </div> -->
+            <!-- ワークスペースを挿入する領域 -->
+            <div style="height: 82vh; width: 50vw" id="blocklyDiv"></div> <!--範囲だけ決めてmain.jsでワークスペースを挿入-->
+          </div>
+        </div>
+
+        <div class="startScreen-container">
+          <!-- ステートマシン図を表示する領域 -->
+          <div class="mdl-card mdl-shadow--2dp image-container" id="imageModel"></div>
+        </div>
+        <!-- excelで取得したxmlを記述したxmlファイルを読み込むことで復元可能 -->
+         <!-- <input type="file" id="xmlLoader" accept=".xml,.txt"> -->
+      </div>
+    </main>
+
+    
+
+    <!-- データの保存を行うボタン -->
+    <!-- <div>
+      <div class = "saveButtonArea">
+        <button class="mode-blockly save-button" id="saveData">データの保存</button>
+        <button class="mode-blockly save-button" id="restoreData">データの復元</button>
+      </div>
+
+      <label for="xmlInput"> xmlファイルを選択 </label>
+      <input type="file" id="xmlInput" accept=".xml">
+    </div> -->
+
+    <script>
+      async function fetchData() {
+        const response = await fetch('http://localhost:8888/'); // 接続するためにawaitで待つ
+        return await response.json(); // 値を取得するまでawaitで待つ json形式にして，リストとして受け取る
+      }
+
+      function loadJsFiles(jsFile){
+        // awaitでこの関数を呼び出しているのでpromiseを用いる
+          return new Promise((resolve,reject) => {
+          let jsScript = document.createElement("script");
+          jsScript.src = jsFile;
+          document.body.appendChild(jsScript);
+          jsScript.onload = resolve; 
+          jsScript.onerror = reject;
+        })
+      }
+
+      let astahData;
+
+      async function defineJsFiles() {
+        astahData = await fetchData(); // returnで返される値にはまだ値は入っていない(厳密にはpromiseが返される)ためawaitで待つ必要がある
+        const jsFiles = [
+          "https://unpkg.com/blockly@11.2.2/blockly_compressed.js",
+          "https://unpkg.com/blockly@11.2.2/blocks_compressed.js",
+          "https://unpkg.com/blockly@11.2.2/javascript_compressed.js",
+          "https://unpkg.com/blockly@11.2.2/msg/ja.js",
+          "https://code.getmdl.io/1.2.1/material.min.js",
+          "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js",
+          // "https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js",
+          "scripts/logs/logtext.js",
+          "scripts/blocks/variable_setting.js",
+          "scripts/button/button_setting.js",
+          "scripts/functions/dataSave.js",
+          "scripts/functions/changeModel.js",
+          "scripts/functions/motionView.js",
+          "scripts/functions/guidance.js",
+          "scripts/functions/taskSelection.js",
+          "scripts/blocks/block_state.js",
+          "scripts/blocks/block_trigger.js",
+          "scripts/blocks/block_guard.js",
+          "scripts/blocks/block_motionrules.js",
+          "scripts/blocks/block_behavior.js",
+          "scripts/blocks/block_effect.js",
+          "scripts/blocks/block_variable.js",
+          "scripts/blocks/block_transition2.js",
+          "scripts/blocks/block_switch.js",
+          "scripts/main.js",
+          "scripts/blocks/register_blocks.js",
+          "scripts/blocks/opacity_controller.js",
+          "scripts/functions/js_functions.js",
+        ]
+
+        // 非同期処理でjavaファイルから必要なデータが取得できたのでjsファイルを読み込む
+        // 先に読み込んでしまうとjavaファイルからデータ(astahのデータ)を受け取る前にjsファイルが実行されてしまうため
+        for (let src of jsFiles){
+          await loadJsFiles(src); // jsファイルの読み込みも非同期？であるためawaitしないと他の処理が先に実行されてしまう
+        }
+    };
+
+    window.onload = defineJsFiles;
+    
+    </script>
+  </body>
+</html>
