@@ -15,9 +15,10 @@
 
     <!-- スタイルシートの設定 -->
     <!-- mdlは外部のcssファイル -->
-    <link
+    <!-- <link
       rel="stylesheet" 
-      href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css" /> 
+      href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css" />  -->
+    <link rel="stylesheet" href="styles/material.min.css">
     <!-- 内部のcssファイル -->
     <link 
       rel="stylesheet"  
@@ -43,6 +44,9 @@
         .blocklyTreeIcon {
           width: 20px !important;
           height: 40px !important;
+        }
+        #restoreMenu, #restoreMenu option {
+          text-transform: none !important;
         }
       </style>
   </head>
@@ -181,7 +185,7 @@
 
     <script>
       async function fetchData() {
-        const response = await fetch("https://blocksm-backend.onrender.com/"); // 接続するためにawaitで待つ
+        const response = await fetch('http://localhost:8888/'); // 接続するためにawaitで待つ
         return await response.json(); // 値を取得するまでawaitで待つ json形式にして，リストとして受け取る
       }
 
@@ -205,8 +209,8 @@
           "https://unpkg.com/blockly@11.2.2/blocks_compressed.js",
           "https://unpkg.com/blockly@11.2.2/javascript_compressed.js",
           "https://unpkg.com/blockly@11.2.2/msg/ja.js",
-          "https://code.getmdl.io/1.2.1/material.min.js",
           "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js",
+          "scripts/js/material.min.js",
           // "https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js",
           "scripts/logs/logtext.js",
           "scripts/blocks/variable_setting.js",

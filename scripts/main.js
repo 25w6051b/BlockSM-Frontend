@@ -545,7 +545,8 @@ function moveAnalyze(event){
 
       // 切断された場合
       else if (!event.newParentId && event.oldParentId) {
-        const oldParentBlockText = (Blockly.getMainWorkspace().getBlockById(event.oldParentId)).toString();
+        const oldParentBlock = Blockly.getMainWorkspace().getBlockById(event.oldParentId);
+        const oldParentBlockText = oldParentBlock ? oldParentBlock.toString() : "(親なし)";
         logToTxt(`移動：${movedBlock.type}, 「${movedBlockText} 」が「 ${oldParentBlockText} 」から切断`)
       }
 

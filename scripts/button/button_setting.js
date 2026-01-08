@@ -310,13 +310,13 @@ function handleRestoreChange() {
 
 // 「データの削除」ボタン押下時にデータの削除を行う関数
 function deleteSaveItem() {
-    var inputValue = document.getElementById('deleteNameInput').value; // 入力領域から保存名を取得
+    var saveValue = document.getElementById('deleteNameInput').value; // 入力領域から保存名を取得
+    var inputValue = STORAGE_KEY + `${currentTask}:` + saveValue;
     var localStorageKeyList = []; // ローカルストレージのキー値を追加するリスト
     // ローカルストレージのキーをリストに追加
     for (let i = 0; i < localStorage.length; i++) {
         localStorageKeyList.push(localStorage.key(i)); 
     };
-    
     // 入力された値がローカルストレージのキーと一致するかを確認し，存在すれば削除する
     if(localStorageKeyList.includes(inputValue)){
         logToTxt("「データの削除」ボタンが押されました");
@@ -324,16 +324,16 @@ function deleteSaveItem() {
         // データの復元ボタン内のキー値も削除
         for(let i = 0; i < restoreMenu.options.length; i++ ){
             let optionName = restoreMenu.options[i];
-            if (optionName.id == inputValue){
+            if (optionName.id == saveValue){
                 restoreMenu.removeChild(optionName);
-                logToTxt("データ名「" +inputValue + "」が削除されました.");
+                logToTxt("データ名「" + saveValue + "」が削除されました.");
                 break;
             }
         }
     }
     else{
-        logToTxt("データ名「" +inputValue + "」は存在しないため削除できません.");
-        alert("データ名「" +inputValue + "」は存在しないため削除できません．");
+        logToTxt("データ名「" + saveValue + "」は存在しないため削除できません.");
+        alert("データ名「" + saveValue + "」は存在しないため削除できません．");
     };
 
     displayStyle("inputdeleteNameContainer","deleteNameInput"); // 削除後は入力領域を見えなくする
@@ -561,7 +561,8 @@ function stmbpToPuml() {
 
 // web画面にモデルの画像を出力する関数
 function displayStateMachine(){
-    var xmlData = Blockly.Xml.workspaceToDom(blockspace);
+    workSpace = Blockly.getMainWorkspace(); // ワークスペースの情報を取得する
+    var xmlData = Blockly.Xml.workspaceToDom(workSpace);
     var xmlText = Blockly.Xml.domToText(xmlData); // XMLを文字列として取得
     var blockTags = xmlText.replace(/<xml[^>]*?>/, '<xml>');
     // ブロックが配置されていたらサーバーから画像を作成して表示する

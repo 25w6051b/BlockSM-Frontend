@@ -145,8 +145,8 @@ javascript.javascriptGenerator.forBlock['customControlsIfType'] = function(block
       // ガードがtrueの場合だけ
       if(branchCode != ""){
         code += `${branchCode}`;
-        eventIfKey = true;
       }
+      eventIfKey = true;
     }
   }
 
@@ -179,8 +179,8 @@ javascript.javascriptGenerator.forBlock['customControlsElseIfType'] = function(b
         // ガードがtrueの場合だけ
         if(branchCode != ""){
           code += `${branchCode}`;
-          eventIfKey = true;
         }
+         eventIfKey = true;
       };
   };
 

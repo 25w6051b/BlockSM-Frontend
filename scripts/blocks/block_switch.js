@@ -157,7 +157,8 @@ javascript.javascriptGenerator.forBlock['firstDefinitionType'] = function(block)
     // 開始疑似状態からの遷移はただ一つだけかどうか調べる
     // 次の状態が"未定義"じゃないかも調べる
     if (hasInitialState.transition.length == 1){
-      if(!hasInitialState.transition[0].nextState.includes("未定義")){
+      const nextState = hasInitialState.transition[0]?.nextState;
+      if (nextState && !nextState.includes("未定義")) {
         currentState = "初期状態";
         // console.log("初めの状態は：" + currentState + "です");
         code +=`if (!hasInvalidBlocks){
